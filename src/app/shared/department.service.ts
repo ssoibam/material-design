@@ -25,7 +25,7 @@ export class DepartmentService {
     if ($key =="0")
     return "";
     else{
-      return _.find(this.array, (obj) => { return obj.$key; })['name'];
+      return _.find(this.array, (obj) => { return obj.$key == $key; })['name'];
     }
   }
 }
