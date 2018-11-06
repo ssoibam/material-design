@@ -3,6 +3,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatSort, MatPaginator } from '@angular/material';
 import { EmployeeService } from '../../shared/employee.service';
 import { DepartmentService } from '../../shared/department.service';
+import { MatDialog, MatDialogConfig }from "@angular/material";
+import { EmployeeComponent } from '../employee/employee.component';
+import { NotificationService } from '../../shared/notification.service';
+import { DialogService } from '../../shared/dialog.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -13,7 +17,10 @@ import { DepartmentService } from '../../shared/department.service';
 export class EmployeeListComponent implements OnInit {
 
   constructor(private service: EmployeeService,
-    private departmentService: DepartmentService) { }
+    private departmentService: DepartmentService,
+    private dialog: MatDialog,
+    private notificationService: NotificationService,
+    private dialogService: DialogService) { }
 
   listData: MatTableDataSource<any>;
   displayedColumns: string[] = ['fullName', 'email', 'mobile', 'city','departmentName','actions'];
@@ -48,5 +55,30 @@ export class EmployeeListComponent implements OnInit {
   }
   applyFilter(){
     this.listData.filter = this.searchKey.trim().toLowerCase();
+  }
+  onCreate() {
+    this.service.initializeFormGroup();
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = "60%";
+    this.dialog.open(EmployeeComponent,dialogConfig);
+  }
+  onEdit(row) {
+    this.service.populateForm(row);
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = "60%";
+    this.dialog.open(EmployeeComponent,dialogConfig);
+  }
+  onDelete($key){
+  this.dialogService.openConfirmDialog('Are you sure to delete this record?')
+  .afterClosed().subscribe( res =>{
+    if(res){
+      this.service.deleteEmployee($key);
+      this.notificationService.warn('! Deleted successfully');
+    }
+  });
   }
 }
